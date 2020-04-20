@@ -10,12 +10,13 @@ const selectedNotes = document.querySelector('.selectedNotes')
 const deleteButton = document.querySelector('.deleteButton')
 const deleteAllButton = document.querySelector('.deleteAllButton')
 
-
+let numOfTabNotes = 50
 let numOfFrets = 20
 const singleFretMarkPositions = [3, 5, 7, 9, 15, 17, 19, 21]
 const doubleFretMarkPositons = [12, 24]
 const notesFlat = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 const notesSharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+let firstNote = 0
 
 let accidentals = 'flats';
 const instrumentTuningPresets = {
@@ -51,6 +52,7 @@ const app = {
       for (let fret = 0; fret <= numOfFrets; fret++) {
         let noteFret = tools.createElement('div')
         noteFret.classList.add('noteFret')
+        noteFret.setAttribute('id', i + '_' + fret)
         string.appendChild(noteFret)
 
         let noteName = this.generateNoteNames((fret + instrumentTuningPresets[selectedInstrument][i]), accidentals)
@@ -69,18 +71,20 @@ const app = {
       }
     }
   },
-  setupTabs(){
-    tabs.innerHTML = ''
+  setupTabs() {
+    // tabs.innerHTML = ''
+    root.style.setProperty('--number-of-strings', numOfStrings)
     for (let i = 0; i < numOfStrings; i++) {
       let string = tools.createElement('div')
-      string.classList.add('tabstring')
+      string.classList.add('tabString')
       string.setAttribute('id', 'tabString' + i)
       tabs.appendChild(string)
-      for (let j = 0; j < 50; j++) {
-        const note = tools.createElement('div')
+      for (let j = 0; j < numOfTabNotes; j++) {
+        let note = tools.createElement('div')
         note.classList.add('tabNote')
-        note.setAttribute('id', 'tabNote' + j)
-        tabs.appendChild(note)
+        note.setAttribute('id', i + '-' + j)
+        note.textContent = '-'
+        string.appendChild(note)
       }
     }
   },
@@ -101,41 +105,39 @@ const app = {
     }
   },
   showNoteDot(event) {
-    if (event.target.classList.add.contains('noteFret')) {
+    if (event.target.classList.contains('noteFret')) {
       event.target.style.setProperty('--note-dot-opacity', 1)
     }
   },
   hideNoteDot(event) {
     // console.log(event.target.onclick)
     // if (fretboard.clicked == false) {
-      event.target.style.setProperty('--note-dot-opacity', 0)
-      
+    event.target.style.setProperty('--note-dot-opacity', 0)
+
     // }
   },
   setupEventListeners() {
     fretboard.addEventListener('mouseover', this.showNoteDot)
     fretboard.addEventListener('mouseout', this.hideNoteDot)
     fretboard.addEventListener('click', (event) => {
-      // console.log(event.target.offsetParent.id)
-      // console.log(event.target.dataset.note)
       let noteSelected = tools.createElement('h1')
+      // console.log(event)
+      let noteID = event.target.id
       noteSelected.textContent = event.target.dataset.note
       noteSelected.setAttribute('id', event.target.offsetParent.id)
-      noteSelected.classList.add.add('noteSelected')
+      noteSelected.classList.add('noteSelected')
       selectedNotes.appendChild(noteSelected)
-      // console.log(selectedNotes)
-      // console.log(selectedNotes.children)
-      // for (let i = 0; i < selectedNotes.children.length; i++) {
-      //   console.log(selectedNotes.children[i].id + 'this')
-      //   if (selectedNotes.children[i].id !== event.target.offsetParent.id) {
-      //     console.log('oops')
-      //   }else{
-          
-      //     console.log('nope')
-      //   }
-      // }
-      // console.log(selectedNotes)
-      // this.showNoteDot
+      let tabNoteID = `${noteID.split('_')[0]}-${firstNote++}`
+      let nextNote = document.getElementById(tabNoteID)
+      for (let i = 0; i < tabs.children.length; i++) {
+        let strings = tabs.children[i]
+        for (let j = 0; j < strings.children.length; j++) {
+          let notes = strings.children[j]
+          if (noteID.split('_')[0] == notes.id.split('-')[0] && noteID.split('_')[1] == notes.id.split('-')[1]) {
+              nextNote.textContent = noteID.split('_')[1]
+            }
+          }
+        }
     })
     deleteButton.addEventListener('click', (event) => {
       // selectedNotes.removeChild(selectedNotes.lastChild)
